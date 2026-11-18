@@ -1,0 +1,7 @@
+Django>=5.2,<6.0
+gunicorn>=23,<24
+matplotlib>=3.9,<4.0
+PyMySQL>=1.1,<2.0
+whitenoise>=6.8,<7
+python-dotenv>=1.0,<2.0
+google-genai>=1.0,<2.0

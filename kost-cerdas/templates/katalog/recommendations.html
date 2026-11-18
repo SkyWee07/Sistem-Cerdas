@@ -1,0 +1,33 @@
+{% extends 'katalog/base.html' %}
+{% load katalog_tags %}
+{% block title %}Rekomendasi fuzzy{% endblock %}
+{% block content %}
+<section class="page-intro"><p class="eyebrow">SISTEM FUZZY · TANPA DATA LATIH</p><h1>Yang paling cocok<br><em>buat kriteriamu.</em></h1><p>Atur preferensi. Sistem akan mengurutkan kos berdasarkan aturan fuzzy tentang anggaran, jarak, rating, dan AC.</p></section>
+<div class="recommend-layout">
+  <form class="preference-card" method="get" action="{% url 'recommendations' %}">
+    <div class="form-head"><span class="form-icon">✳</span><div><p class="eyebrow">PREFERENSIMU</p><h2>Mulai dari kebutuhan.</h2></div></div>
+    <label class="field"><span>ANGGARAN MAKSIMAL (RIBU RUPIAH)</span><input type="number" name="budget" min="100" max="10000" step="50" value="{{ budget|floatformat:0 }}" required></label>
+    <label class="field"><span>JARAK MAKSIMAL (KM)</span><input type="number" name="jarak" min="0.1" max="20" step="0.1" value="{{ max_distance|floatformat:1 }}" required></label>
+    <label class="field"><span>RATING MINIMAL (1–5)</span><input type="number" name="rating" min="1" max="5" step="0.1" value="{{ min_rating|floatformat:1 }}" required></label>
+    <label class="check-field"><input type="checkbox" name="ac" value="ya" {% if require_ac %}checked{% endif %}><span>AC menjadi syarat utama</span></label>
+    <button class="button button-dark button-wide" type="submit">Hitung kecocokan <span aria-hidden="true">→</span></button>
+    <p class="form-hint">Nilai harga pada data menggunakan satuan ribu rupiah per bulan.</p>
+  </form>
+
+  <section class="rank-column" aria-label="Hasil rekomendasi">
+    <div class="rank-heading"><div><p class="eyebrow">HASIL PERINGKAT</p><h2>Kos untuk dipertimbangkan.</h2></div><span class="rank-count">{{ ranked_kos|length }} HASIL</span></div>
+    {% for item in ranked_kos %}
+    <article class="rank-card">
+      <div class="rank-number">{% if forloop.counter < 10 %}0{% endif %}{{ forloop.counter }}</div>
+      <div class="rank-main"><div class="rank-title-row"><a href="{% url 'kos_detail' item.kos.pk %}">{{ item.kos.nama }}</a><span class="fit-label {% if item.score >= 65 %}fit-good{% elif item.score >= 45 %}fit-mid{% else %}fit-low{% endif %}">{{ item.label }}</span></div>
+        <div class="score-track"><span style="width: {{ item.score }}%"></span></div>
+        <div class="rank-meta"><span>Rp {{ item.kos.harga|ribu }} ribu / bulan</span><span>{{ item.kos.jarak_km|floatformat:1 }} km</span><span>★ {{ item.kos.rating|floatformat:1 }}</span><span>{% if item.kos.ac %}AC tersedia{% else %}Tanpa AC{% endif %}</span></div>
+        <div class="reason-tags">{% for note in item.notes %}<span>{{ note }}</span>{% endfor %}</div>
+      </div>
+      <div class="score-value"><strong>{{ item.score|floatformat:0 }}</strong><small>/ 100</small></div>
+    </article>
+    {% empty %}<div class="empty-state"><strong>Belum ada data kos.</strong><p>Impor data CSV dahulu untuk melihat rekomendasi.</p></div>{% endfor %}
+  </section>
+</div>
+<section class="method-note"><span class="method-mark">i</span><div><strong>Bagaimana skor ini dihitung?</strong><p>Sistem memetakan nilai menjadi kategori fuzzy, menerapkan aturan Mamdani, menggabungkan hasil aturan, lalu mengubahnya menjadi skor 0–100 dengan centroid (pusat massa). Aturannya dibuat dari kriteria pilihan pengguna; tidak memerlukan dataset pelatihan. Skor adalah bantuan membandingkan data, bukan jaminan kualitas kos.</p></div></section>
+{% endblock %}

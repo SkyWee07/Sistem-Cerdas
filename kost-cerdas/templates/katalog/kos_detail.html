@@ -1,0 +1,13 @@
+{% extends 'katalog/base.html' %}
+{% load katalog_tags %}
+{% block title %}{{ kos.nama }}{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{% url 'kos_list' %}">Jelajahi kos</a><span>/</span><span>{{ kos.nama }}</span></div>
+<section class="detail-hero"><div><p class="eyebrow">PROFIL KOS · MADIUN</p><h1>{{ kos.nama|capfirst }}<em>.</em></h1><p>Informasi sesuai catatan yang tersedia pada dataset kos Madiun.</p></div><div class="detail-price"><span>HARGA PER BULAN</span><strong>Rp {{ kos.harga|ribu }}<small> ribu</small></strong><span>Satuan harga mengikuti CSV sumber</span></div></section>
+<section class="detail-grid">
+  <article class="detail-stat"><span>JARAK KE KAMPUS</span><strong>{{ kos.jarak_km|floatformat:1 }} <small>km</small></strong><p>Jarak yang tercatat di dataset.</p></article>
+  <article class="detail-stat"><span>RATING</span><strong>★ {{ kos.rating|floatformat:1 }} <small>/ 5</small></strong><p>Nilai rating yang tercatat.</p></article>
+  <article class="detail-stat"><span>FASILITAS AC</span><strong>{% if kos.ac %}Tersedia{% else %}Tidak ada{% endif %}</strong><p>Status fasilitas dari kolom CSV.</p></article>
+</section>
+<div class="detail-actions"><a class="button button-dark" href="{% url 'recommendations' %}">Nilai kecocokan fuzzy <span aria-hidden="true">→</span></a><a class="text-link" href="{% url 'kos_list' %}">← Kembali ke katalog</a></div>
+{% endblock %}

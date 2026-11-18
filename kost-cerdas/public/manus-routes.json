@@ -1,0 +1,1 @@
+{"routes":[{"path":"/","title":"Dashboard Kost Cerdas"},{"path":"/kos/","title":"Daftar kos"},{"path":"/kos/:id/","title":"Detail kos"},{"path":"/rekomendasi/","title":"Rekomendasi fuzzy"},{"path":"/admin/","title":"Administrasi"}]}

@@ -1,0 +1,39 @@
+{% load static katalog_tags %}
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173b30">
+  <title>{% block title %}Kost Cerdas{% endblock %} · Kost Cerdas</title>
+  <link rel="stylesheet" href="{% static 'katalog/site.css' %}">
+</head>
+<body>
+  <div class="topline"></div>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="{% url 'dashboard' %}" aria-label="Kost Cerdas, ke dashboard">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="brand-name">kost<span>cerdas</span><small>DATA KOS MADIUN</small></span>
+      </a>
+      <nav class="main-nav" aria-label="Navigasi utama">
+        <a class="{% if request.path == '/' %}active{% endif %}" href="{% url 'dashboard' %}">Ringkasan</a>
+        <a class="{% if '/kos/' in request.path %}active{% endif %}" href="{% url 'kos_list' %}">Jelajahi kos</a>
+        <a class="{% if '/rekomendasi/' in request.path %}active{% endif %}" href="{% url 'recommendations' %}">Cari yang cocok <span class="nav-spark">✳</span></a>
+      </nav>
+      <a class="header-link" href="{% url 'kos_list' %}">Lihat data <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 Kost Cerdas · Mini Proyek Sistem Cerdas</span>
+      <span>Data pendidikan untuk eksplorasi, bukan patokan harga pasar.</span>
+    </div>
+  </footer>
+</body>
+</html>

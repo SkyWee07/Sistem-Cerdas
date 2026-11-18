@@ -1,0 +1,73 @@
+{% extends 'katalog/base.html' %}
+{% load katalog_tags %}
+{% block title %}Ringkasan data kos{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow"><span class="eyebrow-dot"></span> RUANG BACA DATA · MADIUN</p>
+    <h1>Kenali pola harga.<br><em>Temukan kosmu.</em></h1>
+    <p class="hero-lede">Dashboard kecil untuk membaca data kos Madiun—dari sebaran harga sampai rekomendasi yang mempertimbangkan anggaran, jarak, rating, dan fasilitas.</p>
+    <div class="hero-actions">
+      <a class="button button-dark" href="{% url 'recommendations' %}">Coba rekomendasi <span aria-hidden="true">→</span></a>
+      <a class="text-link" href="{% url 'kos_list' %}">Jelajahi semua kos <span aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+  <aside class="source-card">
+    <div class="source-top"><span class="source-icon">CSV</span><span class="live-pill"><i></i> DATA AKTIF</span></div>
+    <p class="source-kicker">SUMBER DATA</p>
+    <strong>kos_madiun.csv</strong>
+    <span class="source-meta">30 catatan · 5 atribut</span>
+    <div class="source-rule"></div>
+    <a href="https://github.com/SkyWee07/Sistem-Cerdas" target="_blank" rel="noreferrer">Repositori Sistem Cerdas <span aria-hidden="true">↗</span></a>
+    <small>Harga pada CSV dinyatakan dalam ribu rupiah/bulan.</small>
+  </aside>
+  <span class="hero-orbit orbit-one" aria-hidden="true"></span>
+  <span class="hero-orbit orbit-two" aria-hidden="true"></span>
+</section>
+
+<section class="metrics" aria-label="Ringkasan statistik">
+  <article class="metric-card metric-primary"><div class="metric-label">DATA KOS TERCATAT <span>01</span></div><div class="metric-value">{{ kos_count }}</div><div class="metric-foot">baris tersimpan di database</div></article>
+  <article class="metric-card"><div class="metric-label">HARGA RATA-RATA <span>02</span></div><div class="metric-value metric-money">Rp {{ average_price|ribu }}<small> ribu</small></div><div class="metric-foot">per bulan · rentang Rp {{ min_price|ribu }}–{{ max_price|ribu }} ribu</div></article>
+  <article class="metric-card"><div class="metric-label">JARAK RATA-RATA <span>03</span></div><div class="metric-value">{{ average_distance|floatformat:1 }}<small> km</small></div><div class="metric-foot">dari kampus</div></article>
+  <article class="metric-card"><div class="metric-label">RATING RATA-RATA <span>04</span></div><div class="metric-value">{{ average_rating|floatformat:2 }}<small> / 5</small></div><div class="metric-foot">{{ ac_count }} kos memiliki AC</div></article>
+</section>
+
+<section class="section-heading">
+  <div><p class="eyebrow">01 — BACA TREN</p><h2>Angka yang bercerita.</h2></div>
+  <p>Visualisasi dibuat dari catatan yang tersimpan. Setiap titik adalah satu kos; grafik tidak menyatakan hubungan sebab-akibat.</p>
+</section>
+<section class="chart-grid">
+  <article class="panel chart-panel">
+    <div class="panel-heading"><div><span class="chart-index">A</span><h3>Harga dan jarak</h3></div><span class="panel-note">30 TITIK DATA</span></div>
+    {% if price_distance_chart %}<img class="chart-image" src="{{ price_distance_chart }}" alt="Grafik Matplotlib sebaran harga bulanan dan jarak kos dari kampus">{% else %}<div class="empty-chart">Belum ada data untuk divisualisasikan.</div>{% endif %}
+    <p class="chart-caption">Warna hijau menandai kos ber-AC; warna kuning menandai kos tanpa AC.</p>
+  </article>
+  <article class="panel chart-panel">
+    <div class="panel-heading"><div><span class="chart-index chart-index-gold">B</span><h3>Rata-rata menurut AC</h3></div><span class="panel-note">PER BULAN</span></div>
+    {% if price_ac_chart %}<img class="chart-image" src="{{ price_ac_chart }}" alt="Grafik Matplotlib rata-rata harga kos menurut ketersediaan AC">{% else %}<div class="empty-chart">Belum ada data untuk divisualisasikan.</div>{% endif %}
+    <p class="chart-caption">Perbandingan deskriptif dari kelompok dengan dan tanpa AC di dataset ini.</p>
+  </article>
+</section>
+
+<section class="ai-band">
+  <div class="ai-symbol" aria-hidden="true">✳</div>
+  <div class="ai-copy"><p class="eyebrow">02 — BANTUAN INTERPRETASI</p><h2>Grafiknya sudah ada.<br><em>Ingin dibantu membacanya?</em></h2><p>Gemini merangkum pola dari angka agregat yang sama dengan grafik—bukan menebak data yang tidak tersedia.</p></div>
+  <div class="ai-action">
+    <form method="post" action="{% url 'dashboard' %}">{% csrf_token %}<input type="hidden" name="action" value="explain"><button class="button button-light" type="submit" {% if not ai_enabled %}disabled{% endif %}>Jelaskan grafik <span aria-hidden="true">→</span></button></form>
+    {% if not ai_enabled %}<small>Tambahkan GEMINI_API_KEY di lingkungan server.</small>{% else %}<small>Kredensial dipakai hanya di server.</small>{% endif %}
+  </div>
+</section>
+{% if ai_explanation %}<section class="ai-result"><div class="ai-result-label"><span class="result-check">✓</span> PENJELASAN GEMINI</div><div class="ai-result-text">{{ ai_explanation|linebreaks }}</div><small>Gunakan sebagai bahan interpretasi; cek kembali terhadap grafik dan dataset sumber.</small></section>{% endif %}
+{% if ai_error %}<div class="notice notice-warning" role="status">{{ ai_error }}</div>{% endif %}
+
+<section class="section-heading section-heading-table">
+  <div><p class="eyebrow">03 — DATA SUMBER</p><h2>Beberapa kos di dataset.</h2></div>
+  <a class="text-link" href="{% url 'kos_list' %}">Lihat seluruh {{ kos_count }} data <span aria-hidden="true">→</span></a>
+</section>
+{% if sample_kos %}
+<div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>NAMA KOS</th><th>HARGA / BULAN</th><th>JARAK</th><th>RATING</th><th>AC</th><th></th></tr></thead><tbody>
+{% for kos in sample_kos %}<tr><td><a class="table-name" href="{% url 'kos_detail' kos.pk %}">{{ kos.nama }}</a></td><td>Rp {{ kos.harga|ribu }} ribu</td><td>{{ kos.jarak_km|floatformat:1 }} km</td><td><span class="rating-badge">★ {{ kos.rating|floatformat:1 }}</span></td><td>{% if kos.ac %}<span class="tag tag-green">Ada</span>{% else %}<span class="tag">Tidak</span>{% endif %}</td><td><a class="row-arrow" href="{% url 'kos_detail' kos.pk %}" aria-label="Detail {{ kos.nama }}">↗</a></td></tr>{% endfor %}
+</tbody></table></div></div>
+{% else %}<div class="empty-state"><strong>Belum ada data kos.</strong><p>Jalankan migrasi dan perintah import CSV sesuai README untuk mengisi database.</p></div>{% endif %}
+<div class="source-note"><span>SUMBER</span><a href="https://github.com/SkyWee07/Sistem-Cerdas/blob/main/kos_madiun.csv" target="_blank" rel="noreferrer">{{ data_source }} ↗</a><span>·</span><span>CSV repositori tidak mencantumkan berkas lisensi.</span></div>
+{% endblock %}

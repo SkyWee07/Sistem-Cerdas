@@ -1,0 +1,7 @@
+{
+  "include": ["kostcerdas", "katalog", "manage.py"],
+  "exclude": [".venv", "staticfiles", "__pycache__"],
+  "venvPath": ".",
+  "venv": ".venv",
+  "pythonVersion": "3.12"
+}
