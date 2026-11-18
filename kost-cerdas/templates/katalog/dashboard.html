@@ -1,5 +1,5 @@
 {% extends 'katalog/base.html' %}
-{% load katalog_tags %}
+{% load katalog_tags static %}
 {% block title %}Ringkasan data kos{% endblock %}
 {% block content %}
 <section class="hero">
@@ -53,12 +53,14 @@
   <div class="ai-symbol" aria-hidden="true">✳</div>
   <div class="ai-copy"><p class="eyebrow">02 — BANTUAN INTERPRETASI</p><h2>Grafiknya sudah ada.<br><em>Ingin dibantu membacanya?</em></h2><p>Gemini merangkum pola dari angka agregat yang sama dengan grafik—bukan menebak data yang tidak tersedia.</p></div>
   <div class="ai-action">
-    <form method="post" action="{% url 'dashboard' %}">{% csrf_token %}<input type="hidden" name="action" value="explain"><button class="button button-light" type="submit" {% if not ai_enabled %}disabled{% endif %}>Jelaskan grafik <span aria-hidden="true">→</span></button></form>
+    <form id="gemini-explain-form" method="post" action="{% url 'dashboard' %}" aria-busy="false">{% csrf_token %}<input type="hidden" name="action" value="explain"><button id="gemini-explain-button" class="button button-light" type="submit" {% if not ai_enabled %}disabled{% endif %}><span class="button-label">Jelaskan grafik</span> <span aria-hidden="true">→</span></button></form>
+    <span id="gemini-loading-status" class="ai-loading-status" role="status" aria-live="polite" hidden><span class="ai-loading-spinner" aria-hidden="true"></span>Sedang meminta penjelasan Gemini…</span>
     {% if not ai_enabled %}<small>Tambahkan GEMINI_API_KEY di lingkungan server.</small>{% else %}<small>Kredensial dipakai hanya di server.</small>{% endif %}
   </div>
 </section>
 {% if ai_explanation %}<section class="ai-result"><div class="ai-result-label"><span class="result-check">✓</span> PENJELASAN GEMINI</div><div class="ai-result-text">{{ ai_explanation|linebreaks }}</div><small>Gunakan sebagai bahan interpretasi; cek kembali terhadap grafik dan dataset sumber.</small></section>{% endif %}
 {% if ai_error %}<div class="notice notice-warning" role="status">{{ ai_error }}</div>{% endif %}
+<script src="{% static 'katalog/dashboard.js' %}" defer></script>
 
 <section class="section-heading section-heading-table">
   <div><p class="eyebrow">03 — DATA SUMBER</p><h2>Beberapa kos di dataset.</h2></div>

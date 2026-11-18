@@ -46,7 +46,9 @@ Format yang didukung importer: `nama`, `jarak_km`, `harga`, `ac`, dan `rating`. 
 
 ## Konfigurasi Gemini
 
-Sediakan `GEMINI_API_KEY` sebagai protected environment secret di server atau sebagai variabel lokal di `.env`. Secara default, aplikasi menggunakan model `gemini-4-carbon`; model dapat diganti melalui `GEMINI_MODEL`. Aplikasi memakai Google Gen AI SDK dan Interactions API. Model dan endpoint yang tersedia dapat berubah; periksa [daftar model Gemini](https://aistudio.google.com/docs/models) sebelum mengganti konfigurasi. Tombol penjelasan baru memanggil API ketika ditekan.
+Sediakan `GEMINI_API_KEY` sebagai protected environment secret di server atau sebagai variabel lokal di `.env`. Secara default, aplikasi menggunakan model `gemini-3.5-flash-lite`; model dapat diganti melalui `GEMINI_MODEL`. Aplikasi memakai Google Gen AI SDK dan Interactions API. Model dan endpoint yang tersedia dapat berubah; periksa [daftar model Gemini](https://aistudio.google.com/docs/models) sebelum mengganti konfigurasi. Tombol penjelasan baru memanggil API ketika ditekan.
+
+Kegagalan Gemini dicatat di log server dengan kode status, nama model, atau jenis exception saja. API key, isi respons provider, teks exception, dan ringkasan data tidak dicatat. Pesan pada halaman membedakan kesalahan autentikasi, izin/kuota, model yang tidak tersedia, timeout, jaringan, dan gangguan server.
 
 ## Pemeriksaan dasar
 
@@ -58,6 +60,8 @@ python manage.py test
 ## Deployment
 
 Proyek menyertakan `Dockerfile` dan `entrypoint.sh`. Container memasang dependensi, mengumpulkan static files, menjalankan migrasi, mengimpor CSV hanya jika database kosong, kemudian menjalankan Gunicorn pada `0.0.0.0:$PORT` (default 3000). Atur `DATABASE_URL` ke database persisten dan `GEMINI_API_KEY` sebagai protected server secret pada environment deployment. Health endpoint publik yang tidak memerlukan login adalah `/health/`.
+
+Untuk produksi, set `DEBUG=false`, batasi `ALLOWED_HOSTS` ke domain aplikasi, dan aktifkan `SECURE_SSL_REDIRECT=true`. `SECURE_HSTS_SECONDS` dimulai dari 3600 detik; naikkan hanya setelah HTTPS berfungsi end-to-end. Biarkan `SECURE_HSTS_INCLUDE_SUBDOMAINS=false` dan `SECURE_HSTS_PRELOAD=false` sampai semua subdomain benar-benar hanya melayani HTTPS dan keputusan preload sudah ditinjau. Django mempercayai `X-Forwarded-Proto: https` dari reverse proxy; pastikan proxy mengatur header itu dengan benar agar redirect tidak berulang. Jalankan `python manage.py check --deploy` sebelum rilis.
 
 Jangan taruh API key pada JavaScript, template, README, atau repository. Database pengembangan dan deployment dapat memakai database yang sama pada platform ini; perlakukan migrasi dan impor sebagai perubahan data sungguhan.
 

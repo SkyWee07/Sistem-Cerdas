@@ -7,7 +7,13 @@ from urllib.parse import parse_qs, unquote, urlsplit
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY") or secrets.token_urlsafe(48)
-DEBUG = os.getenv("DEBUG", "false").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_bool(name, default=False):
+    return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+
+
+DEBUG = _env_bool("DEBUG", False)
 ALLOWED_HOSTS = [item.strip() for item in os.getenv("ALLOWED_HOSTS", "*").split(",") if item.strip()]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -21,7 +27,34 @@ CSRF_COOKIE_SAMESITE = "Lax" if DEBUG else "None"
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SAMESITE = "Lax" if DEBUG else "None"
 SESSION_COOKIE_SECURE = not DEBUG
+# The managed reverse proxy must overwrite X-Forwarded-Proto before forwarding requests.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = _env_bool("SECURE_SSL_REDIRECT", not DEBUG)
+# Start with a short HSTS lifetime in production; raise it only after HTTPS is verified end-to-end.
+SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "0" if DEBUG else "3600"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", False)
+SECURE_HSTS_PRELOAD = _env_bool("SECURE_HSTS_PRELOAD", False)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "gemini": {"format": "%(asctime)s %(levelname)s %(name)s: %(message)s"},
+    },
+    "handlers": {
+        "gemini_console": {
+            "class": "logging.StreamHandler",
+            "formatter": "gemini",
+        },
+    },
+    "loggers": {
+        "katalog.services": {
+            "handlers": ["gemini_console"],
+            "level": os.getenv("GEMINI_LOG_LEVEL", "WARNING").upper(),
+            "propagate": False,
+        },
+    },
+}
 
 INSTALLED_APPS = [
     "django.contrib.admin",

@@ -3,6 +3,7 @@ import statistics
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.http import require_GET
 
 from .charts import average_price_by_ac_chart, price_distance_chart
@@ -44,6 +45,7 @@ def _dashboard_summary(rows):
     )
 
 
+@xframe_options_exempt
 def dashboard(request):
     rows = list(Kos.objects.all())
     prices = [float(row.harga) for row in rows]
@@ -69,7 +71,7 @@ def dashboard(request):
         "ac_count": sum(1 for row in rows if row.ac),
         "price_distance_chart": price_distance_chart(rows) if rows else None,
         "price_ac_chart": average_price_by_ac_chart(rows) if rows else None,
-        "ai_enabled": bool(os.getenv("GEMINI_API_KEY")),
+        "ai_enabled": bool(os.getenv("GEMINI_API_KEY", "").strip()),
         "ai_explanation": ai_explanation,
         "ai_error": ai_error,
         "data_source": "SkyWee07/Sistem-Cerdas · kos_madiun.csv",
@@ -78,6 +80,7 @@ def dashboard(request):
     return render(request, "katalog/dashboard.html", context)
 
 
+@xframe_options_exempt
 @require_GET
 def kos_list(request):
     records = Kos.objects.all()
@@ -112,12 +115,14 @@ def kos_list(request):
     })
 
 
+@xframe_options_exempt
 @require_GET
 def kos_detail(request, pk):
     kos = get_object_or_404(Kos, pk=pk)
     return render(request, "katalog/kos_detail.html", {"kos": kos})
 
 
+@xframe_options_exempt
 @require_GET
 def recommendations(request):
     budget = _safe_float(request.GET.get("budget"), 1100.0, 100.0, 10000.0)
